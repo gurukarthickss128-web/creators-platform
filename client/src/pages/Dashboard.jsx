@@ -1,25 +1,27 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  // get user directly from localStorage
-  const user = JSON.parse(localStorage.getItem("user"));
+  // ✅ Get everything from context
+  const { user, logout, isAuthenticated, loading } = useAuth();
 
+  // ✅ Protect route
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
+    if (!loading && !isAuthenticated()) {
       navigate("/login");
     }
-  }, [navigate]);
+  }, [loading, isAuthenticated, navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
+    logout(); // ✅ handled by context
   };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div style={{ padding: "20px" }}>
@@ -27,7 +29,9 @@ export default function Dashboard() {
 
       {user ? (
         <>
-          <p>👋 Welcome, <b>{user.name}</b></p>
+          <p>
+            👋 Welcome, <b>{user.name}</b>
+          </p>
           <p>Email: {user.email}</p>
 
           <button onClick={handleLogout}>
@@ -35,7 +39,7 @@ export default function Dashboard() {
           </button>
         </>
       ) : (
-        <p>Loading...</p>
+        <p>No user found</p>
       )}
     </div>
   );
