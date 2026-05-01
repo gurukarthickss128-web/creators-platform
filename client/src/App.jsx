@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { AuthProvider } from "./context/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
 
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -10,8 +11,8 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import CreatePost from "./pages/CreatePost";
 import NotFound from "./pages/NotFound";
-import PublicRoute from "./components/PublicRoute";
 
 function App() {
   return (
@@ -20,25 +21,26 @@ function App() {
         <Header />
 
         <Routes>
-          {/* Public Routes */}
+          {/* 🌐 Public Routes */}
           <Route path="/" element={<Home />} />
-          <Route
-  path="/login"
-  element={
-    <PublicRoute>
-      <Login />
-    </PublicRoute>
-  }
-/>
 
-<Route
-  path="/register"
-  element={
-    <PublicRoute>
-      <Register />
-    </PublicRoute>
-  }
-/>
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
+          />
 
           {/* 🔐 Protected Routes */}
           <Route
@@ -50,18 +52,17 @@ function App() {
             }
           />
 
-          {/* Future protected routes example:
+          {/* ➕ CREATE POST ROUTE (FIXED) */}
           <Route
-            path="/profile"
+            path="/create"
             element={
               <ProtectedRoute>
-                <Profile />
+                <CreatePost />
               </ProtectedRoute>
             }
           />
-          */}
 
-          {/* 404 */}
+          {/* ❌ 404 PAGE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
 
