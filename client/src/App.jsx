@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
+import PublicRoute from "./components/PublicRoute";
 
 function App() {
   return (
@@ -19,11 +20,27 @@ function App() {
         <Header />
 
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route
+  path="/login"
+  element={
+    <PublicRoute>
+      <Login />
+    </PublicRoute>
+  }
+/>
 
-          {/* 🔐 Protected Route */}
+<Route
+  path="/register"
+  element={
+    <PublicRoute>
+      <Register />
+    </PublicRoute>
+  }
+/>
+
+          {/* 🔐 Protected Routes */}
           <Route
             path="/dashboard"
             element={
@@ -33,6 +50,18 @@ function App() {
             }
           />
 
+          {/* Future protected routes example:
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          */}
+
+          {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
 
