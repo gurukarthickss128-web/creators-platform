@@ -5,10 +5,9 @@ import { useAuth } from "../hooks/useAuth";
 export default function Dashboard() {
   const navigate = useNavigate();
 
-  // ✅ Get everything from context
   const { user, logout, isAuthenticated, loading } = useAuth();
 
-  // ✅ Protect route
+  // Protect route
   useEffect(() => {
     if (!loading && !isAuthenticated()) {
       navigate("/login");
@@ -16,7 +15,7 @@ export default function Dashboard() {
   }, [loading, isAuthenticated, navigate]);
 
   const handleLogout = () => {
-    logout(); // ✅ handled by context
+    logout();
   };
 
   if (loading) {
