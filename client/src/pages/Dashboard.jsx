@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import api from "../services/api";
 
@@ -20,7 +20,7 @@ export default function Dashboard() {
     }
   }, [loading, isAuthenticated, navigate]);
 
-  // ✅ CLEAN FIX: no fetch function, no eslint issue
+  // FETCH POSTS
   useEffect(() => {
     if (!user) return;
 
@@ -45,6 +45,32 @@ export default function Dashboard() {
 
     loadPosts();
   }, [page, user]);
+
+  /* =========================
+     DELETE POST (NEW)
+  ========================= */
+  const handleDelete = async (postId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this post?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const res = await api.delete(`/api/posts/${postId}`);
+
+      if (res.data.success) {
+        // optimistic UI update
+        setPosts((prev) =>
+          prev.filter((post) => post._id !== postId)
+        );
+      }
+    } catch (err) {
+      alert(
+        err.response?.data?.message || "Failed to delete post"
+      );
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -93,6 +119,33 @@ export default function Dashboard() {
                 <small>
                   {post.category} | {post.status}
                 </small>
+
+                {/* ACTION BUTTONS */}
+                <div style={{ marginTop: "10px" }}>
+                  {/* EDIT */}
+                  <Link to={`/edit/${post._id}`}>
+                    <button
+                      style={{
+                        marginRight: "10px",
+                        background: "blue",
+                        color: "white",
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </Link>
+
+                  {/* DELETE */}
+                  <button
+                    onClick={() => handleDelete(post._id)}
+                    style={{
+                      background: "red",
+                      color: "white",
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))
           )}
