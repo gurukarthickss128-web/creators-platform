@@ -35,19 +35,25 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Handle 401 Unauthorized
+
+    // 🔴 Handle unauthorized
     if (error.response?.status === 401) {
-      // Clear stored auth data
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 
-      // Redirect to login
       window.location.href = '/login';
-
-      console.log('Session expired. Please login again.');
     }
 
-    return Promise.reject(error);
+    // 🔥 Normalize error message for frontend toast
+    const customError = {
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        'Something went wrong',
+      status: error.response?.status,
+    };
+
+    return Promise.reject(customError);
   }
 );
 

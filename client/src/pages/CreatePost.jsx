@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { toast } from "react-toastify";
 
 export default function CreatePost() {
   const [formData, setFormData] = useState({
@@ -11,7 +12,6 @@ export default function CreatePost() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -22,39 +22,44 @@ export default function CreatePost() {
     });
   };
 
-  // ✅ THIS MUST BE USED IN FORM
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // ✅ VALIDATION GOES HERE
-  if (!formData.content || formData.content.trim().length < 10) {
-    setError("Content must be at least 10 characters");
-    return;
-  }
-
-  setLoading(true);
-  setError("");
-
-  try {
-    const res = await api.post("/api/posts", formData);
-
-    if (res.data.success) {
-      navigate("/dashboard");
+    // ✅ Frontend validation
+    if (!formData.title || !formData.content) {
+      toast.error("Title and content are required");
+      return;
     }
-  } catch (err) {
-    setError(err.response?.data?.message || "Failed to create post");
-  } finally {
-    setLoading(false);
-  }
-};
+
+    if (formData.content.trim().length < 10) {
+      toast.error("Content must be at least 10 characters");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await api.post("/api/posts", formData);
+
+      if (res.data.success) {
+        toast.success("Post created successfully!");
+        navigate("/dashboard");
+      }
+
+    } catch (err) {
+      // 🔥 backend error handling
+      toast.error(
+        err.response?.data?.message || "Failed to create post"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Create Post</h1>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      {/* ✅ IMPORTANT FIX HERE */}
       <form onSubmit={handleSubmit}>
         <input
           name="title"
