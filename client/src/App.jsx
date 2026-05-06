@@ -7,22 +7,30 @@ import PublicRoute from "./components/PublicRoute";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 
+// ✅ ADD TOAST
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreatePost from "./pages/CreatePost";
-import EditPost from "./pages/EditPost";   // ✅ FIX ADDED
+import EditPost from "./pages/EditPost";
 import NotFound from "./pages/NotFound";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+
+        {/* 🔥 TOAST CONTAINER (GLOBAL) */}
+        <ToastContainer position="top-right" autoClose={3000} />
+
         <Header />
 
         <Routes>
-          {/* 🌐 PUBLIC ROUTES */}
+          {/* PUBLIC ROUTES */}
           <Route path="/" element={<Home />} />
 
           <Route
@@ -43,7 +51,7 @@ function App() {
             }
           />
 
-          {/* 🔐 PROTECTED ROUTES */}
+          {/* PROTECTED ROUTES */}
           <Route
             path="/dashboard"
             element={
@@ -62,7 +70,6 @@ function App() {
             }
           />
 
-          {/* ✏️ EDIT POST ROUTE (FIXED) */}
           <Route
             path="/edit/:id"
             element={
@@ -72,7 +79,7 @@ function App() {
             }
           />
 
-          {/* ❌ 404 PAGE */}
+          {/* 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
 
