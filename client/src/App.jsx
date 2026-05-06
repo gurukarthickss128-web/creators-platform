@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import CreatePost from "./pages/CreatePost";
+import EditPost from "./pages/EditPost";   // ✅ FIX ADDED
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -21,7 +22,7 @@ function App() {
         <Header />
 
         <Routes>
-          {/* 🌐 Public Routes */}
+          {/* 🌐 PUBLIC ROUTES */}
           <Route path="/" element={<Home />} />
 
           <Route
@@ -42,7 +43,7 @@ function App() {
             }
           />
 
-          {/* 🔐 Protected Routes */}
+          {/* 🔐 PROTECTED ROUTES */}
           <Route
             path="/dashboard"
             element={
@@ -52,12 +53,21 @@ function App() {
             }
           />
 
-          {/* ➕ CREATE POST ROUTE (FIXED) */}
           <Route
             path="/create"
             element={
               <ProtectedRoute>
                 <CreatePost />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ✏️ EDIT POST ROUTE (FIXED) */}
+          <Route
+            path="/edit/:id"
+            element={
+              <ProtectedRoute>
+                <EditPost />
               </ProtectedRoute>
             }
           />
