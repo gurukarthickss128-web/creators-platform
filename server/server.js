@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import uploadRoutes from "./routes/upload.js";
+
 import jwt from "jsonwebtoken";
 
 import { createServer } from "http";
@@ -62,6 +64,8 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.use("/api/upload", uploadRoutes);
 
 // ===============================
 // ROUTES
