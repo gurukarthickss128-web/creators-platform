@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import jwt from "jsonwebtoken";
+
 import { createServer } from "http";
 import { Server } from "socket.io";
 
@@ -23,14 +25,34 @@ const io = new Server(httpServer, {
     credentials: true,
   },
 });
-io.on("connection", (socket) => {
-  console.log("✅ User connected:", socket.id);
 
-  socket.on("disconnect", (reason) => {
-    console.log("❌ User disconnected:", socket.id, reason);
-  });
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+
+  if (!token) {
+    return next(new Error("No token provided"));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    socket.data.user = decoded;
+
+    next();
+  } catch (error) {
+    next(new Error("Authentication error"));
+  }
 });
 
+io.on("connection", (socket) => {
+  console.log(
+    `✅ User connected: ${socket.id} | User: ${socket.data.user.email}`
+  );
+
+  socket.on("disconnect", () => {
+    console.log("❌ User disconnected:", socket.id);
+  });
+});
 // ===============================
 // BASIC MIDDLEWARE
 // ===============================
@@ -45,7 +67,7 @@ app.use(express.json());
 // ROUTES
 // ===============================
 app.use("/api/auth", authRoutes);
-app.use("/api/posts", postRoutes);
+app.use("/api/posts", postRoutes(io));
 
 // ===============================
 // ERROR MIDDLEWARE (MUST BE LAST)

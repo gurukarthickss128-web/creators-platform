@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import api from "../services/api";
 import socket from "../services/socket";
+import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -14,37 +15,63 @@ export default function Dashboard() {
   const [postLoading, setPostLoading] = useState(false);
   const [error, setError] = useState("");
 
+  /* =========================
+     SOCKET CONNECTION
+  ========================= */
   useEffect(() => {
-  socket.connect();
+    // 🔐 Get token
+    const token = localStorage.getItem("token");
 
-  socket.on("connect", () => {
-    console.log("🔌 Connected:", socket.id);
-  });
+    console.log("TOKEN:", token);
 
-  socket.on("disconnect", (reason) => {
-    console.log("❌ Disconnected:", reason);
-  });
+    // attach token to socket handshake
+    socket.auth = { token };
 
-  socket.on("connect_error", (err) => {
-    console.log("Error:", err.message);
-  });
+    // connect socket
+    socket.connect();
 
-  return () => {
-    socket.off("connect");
-    socket.off("disconnect");
-    socket.off("connect_error");
-    socket.disconnect();
-  };
-}, []);
+    // connection success
+    socket.on("connect", () => {
+      console.log("✅ Connected:", socket.id);
+    });
 
-  // Protect route
+    // disconnect
+    socket.on("disconnect", (reason) => {
+      console.log("❌ Disconnected:", reason);
+    });
+
+    // auth / connection errors
+    socket.on("connect_error", (err) => {
+      console.log("Socket auth error:", err.message);
+    });
+
+    // real-time event
+    socket.on("newPost", (data) => {
+      toast.success(data.message);
+    });
+
+    // cleanup (IMPORTANT)
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("connect_error");
+      socket.off("newPost");
+      socket.disconnect();
+    };
+  }, []);
+
+  /* =========================
+     AUTH REDIRECT
+  ========================= */
   useEffect(() => {
     if (!loading && !isAuthenticated()) {
       navigate("/login");
     }
   }, [loading, isAuthenticated, navigate]);
 
-  // FETCH POSTS
+  /* =========================
+     FETCH POSTS
+  ========================= */
   useEffect(() => {
     if (!user) return;
 
@@ -71,7 +98,7 @@ export default function Dashboard() {
   }, [page, user]);
 
   /* =========================
-     DELETE POST (NEW)
+     DELETE POST
   ========================= */
   const handleDelete = async (postId) => {
     const confirmDelete = window.confirm(
@@ -84,7 +111,6 @@ export default function Dashboard() {
       const res = await api.delete(`/api/posts/${postId}`);
 
       if (res.data.success) {
-        // optimistic UI update
         setPosts((prev) =>
           prev.filter((post) => post._id !== postId)
         );
@@ -124,7 +150,6 @@ export default function Dashboard() {
           {postLoading && <p>Loading posts...</p>}
           {error && <p style={{ color: "red" }}>{error}</p>}
 
-          {/* POSTS */}
           {posts.length === 0 && !postLoading ? (
             <p>No posts found</p>
           ) : (
@@ -144,9 +169,7 @@ export default function Dashboard() {
                   {post.category} | {post.status}
                 </small>
 
-                {/* ACTION BUTTONS */}
                 <div style={{ marginTop: "10px" }}>
-                  {/* EDIT */}
                   <Link to={`/edit/${post._id}`}>
                     <button
                       style={{
@@ -159,7 +182,6 @@ export default function Dashboard() {
                     </button>
                   </Link>
 
-                  {/* DELETE */}
                   <button
                     onClick={() => handleDelete(post._id)}
                     style={{

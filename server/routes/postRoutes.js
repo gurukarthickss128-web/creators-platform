@@ -11,29 +11,34 @@ import {
 
 const router = express.Router();
 
-/* =========================
-   CREATE POST
-========================= */
-router.post('/', protect, createPost);
+const postRoutes = (io) => {
 
-/* =========================
-   GET POSTS (PAGINATION)
-========================= */
-router.get('/', protect, getPosts);
+  /* =========================
+     CREATE POST
+  ========================= */
+  router.post('/', protect, (req, res) => createPost(req, res, io));
 
-/* =========================
-   GET SINGLE POST
-========================= */
-router.get('/:id', protect, getPostById);
+  /* =========================
+     GET POSTS (PAGINATION)
+  ========================= */
+  router.get('/', protect, getPosts);
 
-/* =========================
-   UPDATE POST
-========================= */
-router.put('/:id', protect, updatePost);
+  /* =========================
+     GET SINGLE POST
+  ========================= */
+  router.get('/:id', protect, getPostById);
 
-/* =========================
-   DELETE POST
-========================= */
-router.delete('/:id', protect, deletePost);
+  /* =========================
+     UPDATE POST
+  ========================= */
+  router.put('/:id', protect, updatePost);
 
-export default router;
+  /* =========================
+     DELETE POST
+  ========================= */
+  router.delete('/:id', protect, deletePost);
+
+  return router;
+};
+
+export default postRoutes;

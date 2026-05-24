@@ -2,9 +2,9 @@ import Post from '../models/Post.js';
 import AppError from '../utils/AppError.js';
 
 /* =========================
-   CREATE POST
+   CREATE POST + SOCKET EVENT
 ========================= */
-export const createPost = async (req, res, next) => {
+export const createPost = async (req, res, next, io) => {
   try {
     const { title, content, category, status } = req.body;
 
@@ -18,6 +18,16 @@ export const createPost = async (req, res, next) => {
       category,
       status,
       author: req.user._id
+    });
+
+    // 🔥 REAL-TIME EVENT
+    io.emit('newPost', {
+      message: `New post created by ${req.user.name}`,
+      post: {
+        _id: post._id,
+        title: post.title,
+        createdBy: req.user.name
+      }
     });
 
     res.status(201).json({
