@@ -2,8 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { toast } from "react-toastify";
+import ImageUpload from "../components/ImageUpload";
 
 export default function CreatePost() {
+
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -12,6 +14,9 @@ export default function CreatePost() {
   });
 
   const [loading, setLoading] = useState(false);
+
+  // image form data
+  const [, setImageFormData] = useState(null);
 
   const navigate = useNavigate();
 
@@ -22,10 +27,16 @@ export default function CreatePost() {
     });
   };
 
+  // handle image upload
+  const handleUpload = (formData) => {
+    console.log("FormData ready:", formData.get("image"));
+
+    setImageFormData(formData);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ Frontend validation
     if (!formData.title || !formData.content) {
       toast.error("Title and content are required");
       return;
@@ -39,6 +50,10 @@ export default function CreatePost() {
     setLoading(true);
 
     try {
+
+      // currently only creating post
+      // image upload API comes in next lesson
+
       const res = await api.post("/api/posts", formData);
 
       if (res.data.success) {
@@ -47,10 +62,11 @@ export default function CreatePost() {
       }
 
     } catch (err) {
-      // 🔥 backend error handling
+
       toast.error(
         err.response?.data?.message || "Failed to create post"
       );
+
     } finally {
       setLoading(false);
     }
@@ -58,15 +74,18 @@ export default function CreatePost() {
 
   return (
     <div style={{ padding: "20px" }}>
+
       <h1>Create Post</h1>
 
       <form onSubmit={handleSubmit}>
+
         <input
           name="title"
           placeholder="Title"
           value={formData.title}
           onChange={handleChange}
         />
+
         <br /><br />
 
         <textarea
@@ -75,6 +94,7 @@ export default function CreatePost() {
           value={formData.content}
           onChange={handleChange}
         />
+
         <br /><br />
 
         <select
@@ -101,9 +121,14 @@ export default function CreatePost() {
 
         <br /><br />
 
+        <ImageUpload onUpload={handleUpload} />
+
+        <br /><br />
+
         <button type="submit" disabled={loading}>
           {loading ? "Creating..." : "Create Post"}
         </button>
+
       </form>
     </div>
   );
