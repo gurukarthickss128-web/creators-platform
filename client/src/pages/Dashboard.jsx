@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import api from "../services/api";
+import socket from "../services/socket";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -12,6 +13,29 @@ export default function Dashboard() {
   const [page, setPage] = useState(1);
   const [postLoading, setPostLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+  socket.connect();
+
+  socket.on("connect", () => {
+    console.log("🔌 Connected:", socket.id);
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log("❌ Disconnected:", reason);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.log("Error:", err.message);
+  });
+
+  return () => {
+    socket.off("connect");
+    socket.off("disconnect");
+    socket.off("connect_error");
+    socket.disconnect();
+  };
+}, []);
 
   // Protect route
   useEffect(() => {
