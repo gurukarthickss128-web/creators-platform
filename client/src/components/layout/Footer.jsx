@@ -10,7 +10,6 @@ export default function Footer() {
       }}
     >
       <p>© 2026 MyPlatform. All rights reserved.</p>
-      <p>Built by Your Name</p>
     </footer>
   );
 }

@@ -26,6 +26,10 @@ const postSchema = new mongoose.Schema(
       enum: ['Technology', 'Lifestyle', 'Travel', 'Food'],
       default: 'Technology'
     },
+    coverImage: {
+    type: String,
+    default: null
+    },
 
     status: {
       type: String,

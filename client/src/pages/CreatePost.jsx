@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import ImageUpload from "../components/ImageUpload";
 
 export default function CreatePost() {
-
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -14,9 +13,9 @@ export default function CreatePost() {
   });
 
   const [loading, setLoading] = useState(false);
-
-  // image form data
-  const [, setImageFormData] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState(null);
+  const [uploadError, setUploadError] = useState("");
 
   const navigate = useNavigate();
 
@@ -27,13 +26,37 @@ export default function CreatePost() {
     });
   };
 
-  // handle image upload
-  const handleUpload = (formData) => {
-    console.log("FormData ready:", formData.get("image"));
+  // =========================
+  // IMAGE UPLOAD (STEP 1)
+  // =========================
+  const handleUpload = async (formData) => {
+    setUploading(true);
+    setUploadError("");
 
-    setImageFormData(formData);
+    try {
+      const res = await api.post("/api/upload", formData);
+
+      const url = res.data.url;
+
+      setCoverImageUrl(url);
+
+      toast.success("Image uploaded successfully!");
+
+      return url;
+    } catch (err) {
+      const message =
+        err.response?.data?.message || "Image upload failed";
+
+      setUploadError(message);
+      toast.error(message);
+    } finally {
+      setUploading(false);
+    }
   };
 
+  // =========================
+  // CREATE POST (STEP 2)
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -50,23 +73,32 @@ export default function CreatePost() {
     setLoading(true);
 
     try {
+      const payload = {
+        ...formData,
+        coverImage: coverImageUrl || null,
+      };
 
-      // currently only creating post
-      // image upload API comes in next lesson
-
-      const res = await api.post("/api/posts", formData);
+      const res = await api.post("/api/posts", payload);
 
       if (res.data.success) {
         toast.success("Post created successfully!");
+
+        // reset
+        setFormData({
+          title: "",
+          content: "",
+          category: "Technology",
+          status: "draft",
+        });
+
+        setCoverImageUrl(null);
+
         navigate("/dashboard");
       }
-
     } catch (err) {
-
       toast.error(
         err.response?.data?.message || "Failed to create post"
       );
-
     } finally {
       setLoading(false);
     }
@@ -74,11 +106,9 @@ export default function CreatePost() {
 
   return (
     <div style={{ padding: "20px" }}>
-
       <h1>Create Post</h1>
 
       <form onSubmit={handleSubmit}>
-
         <input
           name="title"
           placeholder="Title"
@@ -121,14 +151,22 @@ export default function CreatePost() {
 
         <br /><br />
 
+        {/* IMAGE UPLOAD */}
         <ImageUpload onUpload={handleUpload} />
+
+        {/* LOADING UI */}
+        {uploading && <p>Uploading image...</p>}
+
+        {/* ERROR UI */}
+        {uploadError && (
+          <p style={{ color: "red" }}>{uploadError}</p>
+        )}
 
         <br /><br />
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" disabled={loading || uploading}>
           {loading ? "Creating..." : "Create Post"}
         </button>
-
       </form>
     </div>
   );
