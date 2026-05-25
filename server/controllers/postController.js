@@ -2,11 +2,11 @@ import Post from '../models/Post.js';
 import AppError from '../utils/AppError.js';
 
 /* =========================
-   CREATE POST + SOCKET EVENT
+   CREATE POST
 ========================= */
 export const createPost = async (req, res, next, io) => {
   try {
-    const { title, content, category, status } = req.body;
+    const { title, content, category, status, coverImage } = req.body;
 
     if (!title || !content) {
       return next(new AppError('Title and content are required', 400));
@@ -17,10 +17,10 @@ export const createPost = async (req, res, next, io) => {
       content,
       category,
       status,
+      coverImage: coverImage || null,
       author: req.user._id
     });
 
-    // 🔥 REAL-TIME EVENT
     io.emit('newPost', {
       message: `New post created by ${req.user.name}`,
       post: {

@@ -19,38 +19,27 @@ export default function Dashboard() {
      SOCKET CONNECTION
   ========================= */
   useEffect(() => {
-    // 🔐 Get token
     const token = localStorage.getItem("token");
 
-    console.log("TOKEN:", token);
-
-    // attach token to socket handshake
     socket.auth = { token };
-
-    // connect socket
     socket.connect();
 
-    // connection success
     socket.on("connect", () => {
       console.log("✅ Connected:", socket.id);
     });
 
-    // disconnect
     socket.on("disconnect", (reason) => {
       console.log("❌ Disconnected:", reason);
     });
 
-    // auth / connection errors
     socket.on("connect_error", (err) => {
       console.log("Socket auth error:", err.message);
     });
 
-    // real-time event
     socket.on("newPost", (data) => {
       toast.success(data.message);
     });
 
-    // cleanup (IMPORTANT)
     return () => {
       socket.off("connect");
       socket.off("disconnect");
@@ -116,7 +105,7 @@ export default function Dashboard() {
         );
       }
     } catch (err) {
-      alert(
+      toast.error(
         err.response?.data?.message || "Failed to delete post"
       );
     }
@@ -163,8 +152,26 @@ export default function Dashboard() {
                   borderRadius: "8px",
                 }}
               >
+                {/* =========================
+                    COVER IMAGE (IMPORTANT FIX)
+                ========================= */}
+                {post.coverImage && (
+                  <img
+                    src={post.coverImage}
+                    alt={`Cover image for ${post.title}`}
+                    style={{
+                      width: "100%",
+                      maxHeight: "200px",
+                      objectFit: "cover",
+                      borderRadius: "8px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                )}
+
                 <h3>{post.title}</h3>
                 <p>{post.content}</p>
+
                 <small>
                   {post.category} | {post.status}
                 </small>
@@ -196,7 +203,9 @@ export default function Dashboard() {
             ))
           )}
 
-          {/* PAGINATION */}
+          {/* =========================
+              PAGINATION
+          ========================= */}
           {posts.length > 0 && (
             <div style={{ marginTop: "20px" }}>
               <button
